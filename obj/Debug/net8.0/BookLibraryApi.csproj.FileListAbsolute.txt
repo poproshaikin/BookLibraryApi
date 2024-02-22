@@ -135,3 +135,9 @@ D:\Programs\ASP.NET\BookLibraryApi\BookLibraryApi\bin\Debug\net8.0\ru\Microsoft.
 D:\Programs\ASP.NET\BookLibraryApi\BookLibraryApi\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
 D:\Programs\ASP.NET\BookLibraryApi\BookLibraryApi\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
 D:\Programs\ASP.NET\BookLibraryApi\BookLibraryApi\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+D:\Programs\ASP.NET\BookLibraryApi\BookLibraryApi\obj\Debug\net8.0\BookLibraryApi.sourcelink.json
+D:\Programs\ASP.NET\BookLibraryApi\BookLibraryApi\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+D:\Programs\ASP.NET\BookLibraryApi\BookLibraryApi\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\Programs\ASP.NET\BookLibraryApi\BookLibraryApi\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+D:\Programs\ASP.NET\BookLibraryApi\BookLibraryApi\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+D:\Programs\ASP.NET\BookLibraryApi\BookLibraryApi\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll

@@ -12,8 +12,12 @@ public class Book
     public string Name { get; set; }
     public string Description { get; set; }
     public string AuthorFullName { get; set; }
+    public string Genre { get; set; }
     public int PageCount { get; set; }
     public int Price { get; set; }
+    
+    public int Likes { get; set; }
+    public int Dislikes { get; set; }
     
     [NotMapped]
     public User UploadedUser { get; set; }
