@@ -1,5 +1,7 @@
-﻿using BookLibraryApi.Models;
+﻿using System.Runtime.InteropServices.JavaScript;
+using BookLibraryApi.Models;
 using BookLibraryApi.Models.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookLibraryApi.Controllers;
@@ -8,6 +10,8 @@ namespace BookLibraryApi.Controllers;
 [Route("/[controller]")]
 public class BooksController : Controller
 {
+    private bool _allowBooksUploading = true;
+    
     [HttpGet]
     public IActionResult GetAllBooks()
     {
@@ -29,7 +33,7 @@ public class BooksController : Controller
     }
 
     [Route("/[controller]/book")]
-    public IActionResult GetBookById([FromQuery]int id)
+    public IActionResult GetBookById([FromQuery] int id)
     {
         var context = new DataContext();
 
@@ -48,5 +52,37 @@ public class BooksController : Controller
         Console.WriteLine($"Requested book: {book.BookId}.{book.Name}");
 
         return Ok(book);
+    }
+    
+    [HttpPost("/[controller]/addNewBook")]
+    public IActionResult AddNewBook([FromBody] Book book)
+    {
+        if (!_allowBooksUploading)
+        {
+            return Conflict("Book uploading blocked");
+        }
+        
+        var token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
+        
+        if(!JwtService.Service.IsTokenValid(token))
+        {
+            return Unauthorized("Unauthorized");
+        }
+
+        try
+        {
+            book.UserId = JwtService.Service.GetUserIdByToken(token);
+
+            var context = new DataContext();
+
+            context.Books.Add(book);
+            context.SaveChanges();
+
+            return Ok("Success");
+        }
+        catch
+        {
+            return StatusCode(500, "Internal error");
+        }
     }
 }

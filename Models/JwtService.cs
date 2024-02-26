@@ -28,7 +28,8 @@ public class JwtService
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Name, user.Username)
             }),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256),
+            Expires = DateTime.Now.AddHours(1)
         };
 
         SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
@@ -76,5 +77,14 @@ public class JwtService
             Console.WriteLine("Exception thrown during JWT token validation: " + e.Message);
             return false;
         }
+    }
+
+    public int GetUserIdByToken(string token)
+    {
+        var claims = JwtService.Service.ReadToken(token);
+
+        var neededClaim = claims.FirstOrDefault(c => c.Type == "nameid");
+        
+        return int.Parse(neededClaim.Value);
     }
 }

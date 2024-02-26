@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Nodes;
+﻿using System.Net;
+using System.Text.Json.Nodes;
 using BookLibraryApi.Models;
 using BookLibraryApi.Models.Database;
 using BookLibraryApi.Models.DTO;
@@ -11,7 +12,7 @@ namespace BookLibraryApi.Controllers;
 [Route("/[controller]")]
 public class UsersController : Controller
 {
-    [Route("/[controller]/user")]
+    [HttpGet("/[controller]/user")]
     public IActionResult GetUserById([FromQuery] int id)
     {
         var context = new DataContext();
@@ -99,5 +100,72 @@ public class UsersController : Controller
             
             return Unauthorized("Unauthorized");
         }
+    }
+
+    [HttpPost("/[controller]/userByToken")] 
+    public async Task<IActionResult> GetUserByToken()
+    {
+        string token = "";
+
+        using (var reader = new StreamReader(HttpContext.Request.Body))
+        {
+            token = await reader.ReadToEndAsync();
+        }
+
+        token = token.Replace("\"", "");
+            
+        
+        Console.WriteLine($"Registered attempt of getting user by token: {token}");
+        
+        if (JwtService.Service.IsTokenValid(token))
+        {
+            int userId = JwtService.Service.GetUserIdByToken(token);
+
+            User user;
+
+            using (var context = new DataContext())
+            {
+                user = context.Users.FirstOrDefault(u => u.UserId == userId);
+            }
+
+            user.Password = null;
+
+            Console.WriteLine($"Requested user by token: {token}");
+            Console.WriteLine($"User: {user.UserId}.{user.Username}");
+
+            return Ok(user);
+        }
+        else
+        {
+            return Unauthorized("Unauthorized");
+        }
+    }
+
+    [HttpPatch("/[controller]/changeName")]
+    public IActionResult ChangeName([FromBody] string newName)
+    {
+        var token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
+
+        Console.WriteLine("Changing name");
+        
+        if (!JwtService.Service.IsTokenValid(token))
+        {
+            Console.WriteLine("Refused name changing: unauthorized");
+            
+            return Unauthorized("Unauthorized");
+        }
+
+        var userId = JwtService.Service.GetUserIdByToken(token);
+
+        User user;
+
+        using (var context = new DataContext())
+        {
+            user = context.Users.FirstOrDefault(u => u.UserId == userId)!;
+            user.Name = newName;
+            context.SaveChanges();
+        }
+
+        return Ok(JwtService.Service.UserToken(user));
     }
 }

@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity;
 const string corsOptionsName = "basicCorsOptions";
 
 _ = new JwtService("8wzTHNp3j9QY1X+0/WfO8iMsmC+oSQ21oYg5DCln2tI=");
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
