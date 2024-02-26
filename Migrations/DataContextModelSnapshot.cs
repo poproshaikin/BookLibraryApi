@@ -60,6 +60,27 @@ namespace BookLibraryApi.Migrations
                     b.ToTable("Books");
                 });
 
+            modelBuilder.Entity("BookLibraryApi.Models.Like", b =>
+                {
+                    b.Property<int>("LikeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("LikeId");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Likes");
+                });
+
             modelBuilder.Entity("BookLibraryApi.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -93,6 +114,21 @@ namespace BookLibraryApi.Migrations
 
             modelBuilder.Entity("BookLibraryApi.Models.Book", b =>
                 {
+                    b.HasOne("BookLibraryApi.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BookLibraryApi.Models.Like", b =>
+                {
+                    b.HasOne("BookLibraryApi.Models.Book", null)
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BookLibraryApi.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")

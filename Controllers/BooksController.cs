@@ -16,7 +16,7 @@ public class BooksController : Controller
     public IActionResult GetAllBooks()
     {
         var context = new DataContext();
-
+        
         var books = context.Books.ToList();
 
         foreach (var book in books)
@@ -36,7 +36,7 @@ public class BooksController : Controller
     public IActionResult GetBookById([FromQuery] int id)
     {
         var context = new DataContext();
-
+        
         var book = context.Books.FirstOrDefault(book => book.BookId == id);
 
         if (book == null)
@@ -71,17 +71,25 @@ public class BooksController : Controller
 
         try
         {
-            book.UserId = JwtService.Service.GetUserIdByToken(token);
-
             var context = new DataContext();
+            
+            book.UserId = JwtService.Service.GetUserIdByToken(token);
 
             context.Books.Add(book);
             context.SaveChanges();
 
+            book.UploadedUser = context.Users.FirstOrDefault(u => u.UserId == book.UserId)!;
+            
+            Console.WriteLine("Uploaded new book: ");
+            Console.WriteLine($"{book.BookId}.{book.Name}");
+            Console.WriteLine($"By user: {book.UploadedUser.UserId}.{book.UploadedUser.Username}");
+
             return Ok("Success");
         }
-        catch
+        catch (Exception e)
         {
+            Console.WriteLine("Failed to upload book: " + e.Message);
+            
             return StatusCode(500, "Internal error");
         }
     }

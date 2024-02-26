@@ -15,9 +15,7 @@ public class UsersController : Controller
     [HttpGet("/[controller]/user")]
     public IActionResult GetUserById([FromQuery] int id)
     {
-        var context = new DataContext();
-
-        var user = context.Users.FirstOrDefault(user => user.UserId == id);
+        var user = DataContext.Context.Users.FirstOrDefault(user => user.UserId == id);
 
         if (user == null)
         {
@@ -33,41 +31,34 @@ public class UsersController : Controller
     public IActionResult SignUpUser([FromBody] User userData)
     {
         var context = new DataContext();
-
-        try
+        
+        if (context.Users.FirstOrDefault(user => user.Username == userData.Username) != null)
         {
-            if (context.Users.FirstOrDefault(user => user.Username == userData.Username) != null)
-            {
-                return Conflict("Exists username");
-            }
-
-            if (context.Users.FirstOrDefault(user => user.Email == userData.Email) != null)
-            {
-                return Conflict("Exists email");
-            }
-
-            context.Users.Add(userData);
-            context.SaveChanges();
-            
-            Console.WriteLine($"Registered up new account: {userData.UserId}.{userData.Username}");
-
-            string token = JwtService.Service.UserToken(userData);
-            
-            Console.WriteLine($"Token: {token}");
-            
-            return Ok(token);
+            return Conflict("Exists username");
         }
-        catch
+
+        if (context.Users.FirstOrDefault(user => user.Email == userData.Email) != null)
         {
-            return StatusCode(500, "Internal error");
+            return Conflict("Exists email");
         }
+
+        context.Users.Add(userData);
+        context.SaveChanges();
+        
+        Console.WriteLine($"Registered up new account: {userData.UserId}.{userData.Username}");
+
+        string token = JwtService.Service.UserToken(userData);
+        
+        Console.WriteLine($"Token: {token}");
+        
+        return Ok(token);
     }
 
     [HttpPost("/[controller]/login")]
     public IActionResult Login([FromBody] LoginDTO data)
     {
         var context = new DataContext();
-
+        
         User user = null!;
 
         if (data.Username != null)
@@ -121,17 +112,13 @@ public class UsersController : Controller
         {
             int userId = JwtService.Service.GetUserIdByToken(token);
 
-            User user;
-
-            using (var context = new DataContext())
-            {
-                user = context.Users.FirstOrDefault(u => u.UserId == userId);
-            }
+            var context = new DataContext();
+            
+            User user = context.Users.FirstOrDefault(u => u.UserId == userId);
 
             user.Password = null;
 
-            Console.WriteLine($"Requested user by token: {token}");
-            Console.WriteLine($"User: {user.UserId}.{user.Username}");
+            Console.WriteLine($"Requested user: {user.UserId}.{user.Username}");
 
             return Ok(user);
         }
@@ -145,26 +132,22 @@ public class UsersController : Controller
     public IActionResult ChangeName([FromBody] string newName)
     {
         var token = HttpContext.Request.Headers["Authorization"].ToString().Split(' ')[1];
-
-        Console.WriteLine("Changing name");
         
         if (!JwtService.Service.IsTokenValid(token))
         {
-            Console.WriteLine("Refused name changing: unauthorized");
-            
             return Unauthorized("Unauthorized");
         }
 
         var userId = JwtService.Service.GetUserIdByToken(token);
 
-        User user;
-
-        using (var context = new DataContext())
-        {
-            user = context.Users.FirstOrDefault(u => u.UserId == userId)!;
-            user.Name = newName;
-            context.SaveChanges();
-        }
+        var context = new DataContext();
+        
+        User user = context.Users.FirstOrDefault(u => u.UserId == userId)!;
+        user.Name = newName;
+        
+        context.SaveChanges();
+        
+        Console.WriteLine($"{user.UserId}.{user.Username} changed name: {newName}");
 
         return Ok(JwtService.Service.UserToken(user));
     }
